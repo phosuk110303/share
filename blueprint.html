@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>html{color-scheme:light dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>세컨브레인 설계도</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* 배치: 건축 도면 한 장 — 모눈 종이 위에 표제란, 평면도(자리), 인물표(일꾼), 동선도(협업), 순환도(학습 고리), 범례(외울 말) */
+:root{
+  --bg:#EEF3F8; --grid:#DDE7F1; --surface:#F8FBFD; --fg:#16304F; --muted:#50698A;
+  --line:#8FA8C4; --accent:#9A4A12; --accent-soft:#F3E4D6;
+  --display:"Gowun Batang","Noto Serif KR",Batang,serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono",Consolas,"D2Coding",monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F2747; --grid:#183560; --surface:#14305A; --fg:#E6EEF8; --muted:#A9BFD9;
+    --line:#4F74A3; --accent:#F2C14E; --accent-soft:#2C3F5C; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F2747; --grid:#183560; --surface:#14305A; --fg:#E6EEF8; --muted:#A9BFD9;
+  --line:#4F74A3; --accent:#F2C14E; --accent-soft:#2C3F5C; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px;
+  color:var(--fg); font-family:var(--body); font-size:16px; line-height:1.7;
+  padding-block:32px 64px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+}
+.sheet{max-width:1040px; margin:0 auto; display:flex; flex-direction:column; gap:56px}
+code,.mono{font-family:var(--mono); font-size:.86em}
+h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0; line-height:1.3}
+p{margin:0}
+
+/* 표제란 */
+.title-block{border:2px solid var(--fg); background:var(--surface); display:grid; grid-template-columns:1fr auto}
+.title-main{padding:28px 28px 24px; min-width:0}
+.title-main h1{font-size:clamp(2rem,6vw,3.2rem); font-weight:700; letter-spacing:-.01em}
+.title-main p{margin-top:12px; max-width:38em; color:var(--muted)}
+.title-meta{border-left:2px solid var(--fg); display:grid; grid-template-rows:repeat(4,auto); min-width:190px}
+.title-meta div{padding:10px 16px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:2px}
+.title-meta div:last-child{border-bottom:0}
+.label{font-family:var(--mono); font-size:.7rem; letter-spacing:.08em; color:var(--muted)}
+.title-meta strong{font-weight:600; font-size:.95rem}
+@media (max-width:640px){
+  .title-block{grid-template-columns:1fr}
+  .title-meta{border-left:0; border-top:2px solid var(--fg); grid-template-columns:1fr 1fr; grid-template-rows:auto}
+  .title-meta div:nth-child(odd){border-right:1px solid var(--line)}
+  .title-meta div:nth-last-child(-n+2){border-bottom:0}
+}
+
+/* 구획 머리 */
+.sec{display:flex; flex-direction:column; gap:20px}
+.sec-head{display:flex; align-items:baseline; gap:14px; border-bottom:1px solid var(--line); padding-bottom:8px; flex-wrap:wrap}
+.sec-head h2{font-size:1.55rem}
+.sec-head .label{font-size:.75rem}
+.lede{max-width:40em; color:var(--muted)}
+
+/* 평면도 */
+.plan{display:grid; grid-template-columns:repeat(6,1fr); border:2px solid var(--fg); background:var(--surface)}
+.room{padding:16px 16px 18px; border-right:1px solid var(--line); border-bottom:1px solid var(--line); min-width:0; display:flex; flex-direction:column; gap:4px}
+.room h3{font-size:1.1rem}
+.room .path{font-family:var(--mono); font-size:.78rem; color:var(--accent); overflow-wrap:anywhere}
+.room .who{font-size:.8rem; color:var(--muted)}
+.room p{font-size:.9rem; line-height:1.55}
+.r-fox{grid-column:span 2; grid-row:span 2}
+.r-team{grid-column:span 4}
+.r-half{grid-column:span 2}
+.r-third{grid-column:span 2}
+.drawers{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
+.drawers span{font-size:.78rem; padding:2px 8px; border:1px dashed var(--line); background:var(--bg)}
+.drawers span.new{border-style:solid; border-color:var(--accent); color:var(--accent)}
+@media (max-width:760px){
+  .plan{grid-template-columns:1fr 1fr}
+  .r-fox,.r-team{grid-column:span 2; grid-row:auto}
+  .r-half,.r-third{grid-column:span 1}
+}
+@media (max-width:440px){ .r-half,.r-third{grid-column:span 2} }
+
+/* 일꾼 */
+.crew{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px}
+.person{background:var(--surface); border:1px solid var(--line); padding:18px; display:flex; flex-direction:column; gap:8px; min-width:0}
+.person.lead{border:2px solid var(--fg)}
+.person h3{font-size:1.35rem; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
+.person h3 small{font-family:var(--body); font-size:.78rem; font-weight:500; color:var(--muted)}
+.person p{font-size:.92rem; line-height:1.6}
+.call{font-size:.8rem; color:var(--muted); border-top:1px dashed var(--line); padding-top:8px; margin-top:auto}
+.call b{color:var(--accent); font-weight:500}
+.badge{align-self:flex-start; font-family:var(--mono); font-size:.68rem; letter-spacing:.06em; padding:1px 7px; border:1px solid var(--accent); color:var(--accent)}
+
+/* 네 눈 */
+.eyes{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); border:1px solid var(--line); background:var(--surface)}
+.eyes div{padding:14px 16px; border-right:1px solid var(--line); border-bottom:1px solid var(--line); margin:0 -1px -1px 0}
+.eyes b{font-family:var(--display); font-size:1.1rem; display:block}
+.eyes span{font-size:.88rem; color:var(--muted); line-height:1.5; display:block}
+
+/* 도면 */
+.figure{border:2px solid var(--fg); background:var(--surface); overflow-x:auto}
+.figure svg{display:block; width:100%; min-width:680px; height:auto}
+.figure figcaption,.cap{font-size:.82rem; color:var(--muted)}
+figure{margin:0; display:flex; flex-direction:column; gap:8px}
+svg text{font-family:var(--body); fill:var(--fg)}
+svg .nm{font-family:var(--display); font-size:17px; font-weight:700}
+svg .sub{font-size:11.5px; fill:var(--muted)}
+svg .lbl{font-size:11.5px; fill:var(--accent)}
+svg .box{fill:var(--bg); stroke:var(--fg); stroke-width:1.5}
+svg .box.hi{stroke:var(--accent); stroke-width:2.5}
+svg .box.soft{stroke:var(--line); stroke-dasharray:5 4}
+svg .wire{fill:none; stroke:var(--fg); stroke-width:1.5}
+svg .wire.dash{stroke:var(--accent); stroke-dasharray:6 4}
+svg .head{fill:var(--fg)} svg .head.a{fill:var(--accent)}
+
+/* 순환 */
+.loop{display:grid; grid-template-columns:repeat(4,1fr); gap:0; border:2px solid var(--fg); background:var(--surface)}
+.step{padding:18px 16px; border-right:1px solid var(--line); position:relative; min-width:0}
+.step:last-child{border-right:0}
+.step .n{font-family:var(--mono); font-size:.75rem; color:var(--accent)}
+.step h3{font-size:1.3rem; margin:2px 0 6px}
+.step p{font-size:.9rem; line-height:1.55}
+.back{border:2px solid var(--fg); border-top:0; background:var(--accent-soft); padding:10px 16px; font-size:.9rem; text-align:center}
+@media (max-width:720px){ .loop{grid-template-columns:1fr 1fr} .step:nth-child(2){border-right:0} .step:nth-child(-n+2){border-bottom:1px solid var(--line)} }
+@media (max-width:420px){ .loop{grid-template-columns:1fr} .step{border-right:0; border-bottom:1px solid var(--line)} .step:last-child{border-bottom:0} }
+
+.tbl-wrap{overflow-x:auto; border:1px solid var(--line); background:var(--surface)}
+table{border-collapse:collapse; width:100%; min-width:560px; font-size:.9rem}
+th,td{text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); vertical-align:top}
+th{font-family:var(--mono); font-size:.72rem; letter-spacing:.06em; color:var(--muted); font-weight:500}
+tr:last-child td{border-bottom:0}
+td:first-child{font-family:var(--display); font-weight:700; white-space:nowrap}
+
+/* 외울 말 */
+.words{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px}
+.word{border:1px solid var(--line); background:var(--surface); padding:14px 16px; display:flex; flex-direction:column; gap:4px}
+.word b{font-family:var(--display); font-size:1.2rem}
+.word b::before{content:"“"; color:var(--accent)} .word b::after{content:"”"; color:var(--accent)}
+.word span{font-size:.88rem; color:var(--muted); line-height:1.55}
+.foot{font-size:.8rem; color:var(--muted); border-top:1px solid var(--line); padding-top:12px}
+</style>
+
+<div class="sheet">
+
+<header class="title-block">
+  <div class="title-main">
+    <h1>세컨브레인 설계도</h1>
+    <p>읽고 쓰는 일을 위한 한 지붕. 고슴도치가 판단하고, 우주가 조율하고, 여우와 비서들이 일합니다. 일할수록 배운 것이 쌓여 다음 일로 돌아옵니다.</p>
+  </div>
+  <div class="title-meta">
+    <div><span class="label">도면</span><strong>전체 구조 · 1장</strong></div>
+    <div><span class="label">자리</span><strong>한 지붕 · 금고 하나</strong></div>
+    <div><span class="label">일꾼</span><strong>고슴도치 · 여우 · 비서 11</strong></div>
+    <div><span class="label">그린 날</span><strong>2026-11-14</strong></div>
+  </div>
+</header>
+
+<section class="sec">
+  <div class="sec-head"><h2>자리</h2><span class="label">평면도 — 어느 방이 누구의 것인가</span></div>
+  <p class="lede">폴더 하나가 방 하나입니다. 모든 일꾼이 전체를 읽을 수 있고, 금고(저장소)는 맨 위 하나뿐입니다.</p>
+  <div class="plan">
+    <div class="room r-fox"><h3>여우의 볼트</h3><span class="who">주인 · 사막여우</span>
+      <p>데일리, 씨앗, 여정이 사는 곳. 다른 일꾼은 읽을 수 있고, 고칠 때는 덧붙이기만 합니다. 지우거나 옮기기 전에는 작가님께 여쭙습니다.</p>
+    </div>
+    <div class="room r-team"><h3>비서들의 일터</h3><span class="who">주인 · 우주, 별, 봄, 창문, 평순 팀</span>
+      <p>규칙책, 명단, 산출물 서랍, 배움 노트, 잠시 둘 곳이 있습니다.</p>
+      <div class="drawers">
+        <span class="new">총괄</span><span class="new">문학</span><span class="new">일정</span><span class="new">새시도</span>
+        <span>서평</span><span>토론</span><span>에세이</span><span>소설</span><span>시</span><span>독서모임</span>
+      </div>
+    </div>
+    <div class="room r-half"><h3>배움의 장부</h3><span class="who">주인 · 고슴도치, 우주, 평순</span>
+      <p>구조의 판단, 협업의 교훈, 팀의 교훈, 새 비서 들이는 법.</p>
+    </div>
+    <div class="room r-half"><h3>비서 정의</h3><span class="who">정본 · 비서 11명</span>
+      <p>비서마다 한 장. 기억도 비서마다 따로 둡니다.</p>
+    </div>
+    <div class="room r-third"><h3>안내문</h3><span class="who">주인 · 고슴도치</span>
+      <p>누가 받을지, 어디에 둘지.</p>
+    </div>
+    <div class="room r-third"><h3>도구함</h3><span class="who">주인 · 고슴도치</span>
+      <p>저장, 갈무리, 새 비서 연결.</p>
+    </div>
+    <div class="room r-third"><h3>만나는 자리</h3><span class="who">여우 · 평순</span>
+      <p>에이전트 회의. 금고에는 싣지 않습니다.</p>
+    </div>
+  </div>
+  <p class="cap">테두리가 진한 서랍 넷은 2026-11-14에 새로 놓은 것입니다.</p>
+</section>
+
+<section class="sec">
+  <div class="sec-head"><h2>일꾼</h2><span class="label">인물표 — 이름을 부른 쪽이 답합니다</span></div>
+  <div class="crew">
+    <article class="person lead">
+      <h3>고슴도치 <small>정비사 · Claude 자신</small></h3>
+      <p>전체 판단의 자리. 누가 받을지, 어디에 둘지 정하고 살림·설정·구조를 맡습니다.</p>
+      <p class="call">부르는 말 <b>이름 없이 · 고슴도치 · 정비사</b></p>
+    </article>
+    <article class="person lead">
+      <span class="badge">NEW</span>
+      <h3>우주 <small>총괄 비서</small></h3>
+      <p>일과 일 사이를 맡습니다. 전체를 파악해 일감표를 짜고, 계획과 결과를 네 눈으로 점검하고, 작가님께 올릴 결정을 셋 이하로 추립니다.</p>
+      <p class="call">부르는 말 <b>우주야 · 전체 봐줘 · 오늘 브리핑 · 이 계획 점검해줘</b></p>
+    </article>
+    <article class="person">
+      <span class="badge">NEW</span>
+      <h3>별 <small>문학</small></h3>
+      <p>읽은 것, 쓴 것, 별의 물음을 섞지 않고 가릅니다. 생각 하나를 노트 한 장으로 잇고, 열린 물음으로 사유로 이끕니다.</p>
+      <p class="call">부르는 말 <b>별아 · 이 책 메모 정리 · 글감 찾아줘</b></p>
+    </article>
+    <article class="person">
+      <span class="badge">NEW</span>
+      <h3>봄 <small>일정</small></h3>
+      <p>일정판 한 곳에 모읍니다. 지난 것, 오늘, 7일 안, 겹치는 것을 먼저 알리고 마감에서 거꾸로 세어 준비 날짜를 붙입니다.</p>
+      <p class="call">부르는 말 <b>봄아 · 일정 넣어줘 · 이번 주 일정</b></p>
+    </article>
+    <article class="person">
+      <span class="badge">NEW</span>
+      <h3>창문 <small>새 시도</small></h3>
+      <p>처음 해 보는 일 곁의 친구. 먼저 듣고, 이번 주에 할 수 있는 가장 작은 첫걸음과 돌아볼 날을 함께 정합니다.</p>
+      <p class="call">부르는 말 <b>창문아 · 이거 해보고 싶어 · 될까</b></p>
+    </article>
+    <article class="person">
+      <h3>평순 팀 <small>독서 · 창작 실무</small></h3>
+      <p>총괄 평순과 서평, 토론, 에세이, 소설, 시, 모임. 원고와 독서 모임의 실무를 합니다. 주간 정비와 에이전트 회의는 평순의 몫입니다.</p>
+      <p class="call">부르는 말 <b>평순 · 비서 이름 · 주간 정비</b></p>
+    </article>
+    <article class="person">
+      <h3>사막여우 <small>볼트지기</small></h3>
+      <p>데일리, 씨앗, 여정을 돌보는 세컨브레인의 여우. 여우의 명령은 여우가 받습니다.</p>
+      <p class="call">부르는 말 <b>여우야 · 안녕 · 오아시스 · 냠냠</b></p>
+    </article>
+  </div>
+
+  <h3 style="font-size:1.15rem">우주의 네 눈</h3>
+  <div class="eyes">
+    <div><b>현실</b><span>지금 가진 시간, 힘, 자료로 되는가</span></div>
+    <div><b>명확</b><span>무엇을, 언제까지, 어디까지인가</span></div>
+    <div><b>가치</b><span>작가님께 왜 중요한가</span></div>
+    <div><b>긍정</b><span>이미 되어 있는 것, 살릴 것은 무엇인가</span></div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head"><h2>협업의 길</h2><span class="label">동선도 — 일이 흐르는 방향</span></div>
+  <p class="lede">한 비서로 끝나는 일은 바로 부르시면 됩니다. 영역을 넘어 얽히면 우주가 일감표를 짜고, 고슴도치가 그 순서대로 부릅니다.</p>
+  <figure>
+    <div class="figure">
+      <svg viewBox="0 0 800 440" role="img" aria-label="작가님의 말이 고슴도치를 거쳐 우주, 사막여우, 평순 팀으로 가고, 우주가 봄, 창문, 별을 조율하는 그림">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0 0L10 5L0 10z"/></marker>
+          <marker id="ahA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head a" d="M0 0L10 5L0 10z"/></marker>
+        </defs>
+
+        <path class="wire" d="M370 62V98" marker-end="url(#ah)"/>
+        <path class="wire" d="M370 152V198" marker-end="url(#ah)"/>
+        <path class="wire" d="M300 126H110V198" marker-end="url(#ah)"/>
+        <path class="wire" d="M440 126H690V308" marker-end="url(#ah)"/>
+
+        <path class="wire dash" d="M320 252L185 312" marker-end="url(#ahA)"/>
+        <path class="wire dash" d="M370 252V308" marker-end="url(#ahA)"/>
+        <path class="wire dash" d="M420 252L525 312" marker-end="url(#ahA)"/>
+
+        <path class="wire" d="M310 350H232" marker-end="url(#ah)"/>
+        <path class="wire" d="M430 350H468" marker-end="url(#ah)"/>
+        <path class="wire" d="M592 350H628" marker-end="url(#ah)"/>
+
+        <rect class="box" x="300" y="14" width="140" height="48"/>
+        <text class="nm" x="370" y="44" text-anchor="middle">작가님</text>
+
+        <rect class="box" x="300" y="100" width="140" height="52"/>
+        <text class="nm" x="370" y="123" text-anchor="middle">고슴도치</text>
+        <text class="sub" x="370" y="141" text-anchor="middle">누가 받을지 판단</text>
+
+        <rect class="box soft" x="40" y="200" width="140" height="52"/>
+        <text class="nm" x="110" y="223" text-anchor="middle">사막여우</text>
+        <text class="sub" x="110" y="241" text-anchor="middle">볼트 · 여우의 명령</text>
+
+        <rect class="box hi" x="300" y="200" width="140" height="52"/>
+        <text class="nm" x="370" y="223" text-anchor="middle">우주</text>
+        <text class="sub" x="370" y="241" text-anchor="middle">일감표 · 네 눈 점검</text>
+
+        <rect class="box" x="110" y="310" width="120" height="80"/>
+        <text class="nm" x="170" y="342" text-anchor="middle">봄</text>
+        <text class="sub" x="170" y="362" text-anchor="middle">날짜 · 마감 · 약속</text>
+
+        <rect class="box" x="310" y="310" width="120" height="80"/>
+        <text class="nm" x="370" y="342" text-anchor="middle">창문</text>
+        <text class="sub" x="370" y="362" text-anchor="middle">새 시도 · 첫걸음</text>
+
+        <rect class="box" x="470" y="310" width="120" height="80"/>
+        <text class="nm" x="530" y="342" text-anchor="middle">별</text>
+        <text class="sub" x="530" y="362" text-anchor="middle">가르기 · 사유</text>
+
+        <rect class="box" x="630" y="310" width="140" height="80"/>
+        <text class="nm" x="700" y="338" text-anchor="middle">평순 팀</text>
+        <text class="sub" x="700" y="357" text-anchor="middle">서평 · 토론 · 에세이</text>
+        <text class="sub" x="700" y="373" text-anchor="middle">소설 · 시 · 모임</text>
+
+        <text class="lbl" x="271" y="342" text-anchor="middle">날짜</text>
+        <text class="lbl" x="449" y="342" text-anchor="middle">글감</text>
+        <text class="lbl" x="610" y="342" text-anchor="middle">원고</text>
+        <text class="lbl" x="232" y="276" text-anchor="end">일감표</text>
+        <text class="sub" x="565" y="118" text-anchor="middle">팀 안에서 얽히면 평순</text>
+        <text class="sub" x="205" y="118" text-anchor="middle">여우의 말</text>
+        <text class="sub" x="400" y="424" text-anchor="middle">창문에서 날짜가 생기면 봄에게, 글감이 생기면 별에게. 별의 사유가 익으면 평순 팀의 원고로.</text>
+      </svg>
+    </div>
+    <figcaption>점선은 우주의 일감표. 우주는 다른 비서를 직접 깨우지 못해서, 일감표를 고슴도치에게 돌려주면 고슴도치가 순서대로 부르고 결과를 우주가 종합합니다. 평순 팀 안에서는 책 한 권이 서평(읽기 노트) → 토론(발제) → 모임(진행안)으로 이어집니다.</figcaption>
+  </figure>
+</section>
+
+<section class="sec">
+  <div class="sec-head"><h2>학습 고리</h2><span class="label">순환도 — 쓸수록 나아지는 길</span></div>
+  <p class="lede">참고 자료를 받거나 앞선 일을 이어받을 때, 모든 일꾼이 지키는 순서입니다.</p>
+  <div>
+    <div class="loop">
+      <div class="step"><span class="n">1</span><h3>찾기</h3><p>이미 배운 것이 있는지 배움 노트와 기억, 서랍을 먼저 훑습니다. 있으면 그 위에 잇습니다.</p></div>
+      <div class="step"><span class="n">2</span><h3>기록</h3><p>자료에서 배운 것을 배움 노트에 먼저 적습니다. 출처, 배운 것, 어떻게 쓸지.</p></div>
+      <div class="step"><span class="n">3</span><h3>실행</h3><p>기록한 뒤에 일합니다. 산출물 머리에 어느 배움을 바탕으로 했는지 한 줄.</p></div>
+      <div class="step"><span class="n">4</span><h3>집적</h3><p>결과는 세컨브레인의 서랍에 모읍니다. 일하며 새로 안 것은 배움 노트에 덧붙입니다.</p></div>
+    </div>
+    <div class="back">↺ 쌓인 배움과 산출물이 다음 일의 「찾기」로 돌아옵니다</div>
+  </div>
+
+  <h3 style="font-size:1.15rem">기억의 다섯 겹</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>겹</th><th>어디에</th><th>누가 쓰나</th><th>무엇이 쌓이나</th></tr></thead>
+      <tbody>
+        <tr><td>비서</td><td>비서마다 기억 한 장</td><td>그 비서</td><td>자기 일에서 배운 것. 봄은 걸리는 시간, 창문은 작가님이 시작하는 법, 별은 통한 물음</td></tr>
+        <tr><td>팀</td><td>팀의 정비 장부</td><td>평순</td><td>독서·창작 팀 안의 교훈, 정의 개정 이력</td></tr>
+        <tr><td>협업</td><td>협업 장부</td><td>우주</td><td>누가 누구에게 넘겼고 어디서 막혔나</td></tr>
+        <tr><td>구조</td><td>판단 장부</td><td>고슴도치</td><td>자리·연결·도구의 판정과 번복 조건</td></tr>
+        <tr><td>배움</td><td>배움 노트</td><td>누구나</td><td>참고 자료와 앞선 일에서 배운 것</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="cap">같은 교훈이나 같은 막힘이 세 번 쌓이면 정의 개정 초안이 올라옵니다. 반영은 언제나 작가님 승인 뒤입니다. 그린 날 기준으로 배움 노트는 0장, 팀의 교훈과 주간 정비 기록은 아직 없습니다. 고리는 이제 막 돌기 시작했습니다.</p>
+</section>
+
+<section class="sec">
+  <div class="sec-head"><h2>외울 말</h2><span class="label">범례 — 한마디로 되는 일</span></div>
+  <div class="words">
+    <div class="word"><b>저장</b><span>세이브, 백업, 기록, 커밋, 푸시를 한 번에. 고슴도치가 합니다.</span></div>
+    <div class="word"><b>갈무리</b><span>세이브, 백업, 까미노를 빠짐없이 점검해 한 번에.</span></div>
+    <div class="word"><b>오늘 브리핑</b><span>우주가 일정판, 시도 장부, 열린 물음을 모아 한 화면으로.</span></div>
+    <div class="word"><b>주간 정비</b><span>평순이 기억과 제안함을 훑고 낡은 규칙을 살핍니다.</span></div>
+    <div class="word"><b>에이전트 회의</b><span>여우와 팀이 회의록에서 만납니다. 여우의 몫은 “회의 브리핑”.</span></div>
+    <div class="word"><b>○○ 비서 만들어 줘</b><span>새 비서 들이기. 틀대로 짓고 연결까지 잇습니다.</span></div>
+  </div>
+  <p class="foot">세컨브레인 설계도 · 2026-11-14</p>
+</section>
+
+</div>
+
+</body>
+</html>
